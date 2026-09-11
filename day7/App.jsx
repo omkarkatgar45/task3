@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 
 function App() {
   const [taskText, setTaskText] = useState("");
-
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   const [tasks, setTasks] = useState([]);
@@ -16,6 +15,7 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
+  // Add Task
   const addTask = () => {
     if (taskText.trim() === "") return;
 
@@ -33,6 +33,7 @@ function App() {
     setTaskText("");
   };
 
+  // Complete / Pending
   const toggleTask = (id) => {
     setTasks(
       tasks.map((task) =>
@@ -43,6 +44,7 @@ function App() {
     );
   };
 
+  // Delete
   const deleteTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
   };
@@ -92,7 +94,7 @@ function App() {
           </button>
         </div>
 
-        {/* Completed & Pending */}
+        {/* Complete & Pending */}
         <div className="flex justify-between mb-5 text-lg font-semibold">
           <p className="text-green-600">
             Completed: {completedCount}
