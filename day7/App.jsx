@@ -1,19 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
   const [taskText, setTaskText] = useState("");
 
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      text: "Learn React",
-      completed: false,
-      date: "10/09/2026",
-      time: "14:31:09",
-    },
-  ]);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
-  // Add Task
+  const [tasks, setTasks] = useState([]);
+
+  // Live Date & Time
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const addTask = () => {
     if (taskText.trim() === "") return;
 
@@ -31,7 +33,6 @@ function App() {
     setTaskText("");
   };
 
-  // Complete / Pending
   const toggleTask = (id) => {
     setTasks(
       tasks.map((task) =>
@@ -42,7 +43,6 @@ function App() {
     );
   };
 
-  // Delete
   const deleteTask = (id) => {
     setTasks(tasks.filter((task) => task.id !== id));
   };
@@ -54,9 +54,20 @@ function App() {
     <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-10">
       <div className="bg-white w-full max-w-xl p-6 rounded-xl shadow-lg">
 
-        <h1 className="text-3xl font-bold text-center mb-6">
+        <h1 className="text-3xl font-bold text-center mb-4">
           My Task Tracker
         </h1>
+
+        {/* Live Date & Time */}
+        <div className="text-center mb-6">
+          <p className="text-lg font-semibold text-blue-600">
+            📅 {currentDateTime.toLocaleDateString("en-GB")}
+          </p>
+
+          <p className="text-lg font-semibold text-gray-600">
+            🕒 {currentDateTime.toLocaleTimeString("en-GB")}
+          </p>
+        </div>
 
         {/* Add Task */}
         <div className="flex gap-2 mb-5">
@@ -81,7 +92,7 @@ function App() {
           </button>
         </div>
 
-        {/* Complete & Pending */}
+        {/* Completed & Pending */}
         <div className="flex justify-between mb-5 text-lg font-semibold">
           <p className="text-green-600">
             Completed: {completedCount}
@@ -119,8 +130,12 @@ function App() {
                     {task.text}
                   </p>
 
+                  <p className="text-sm text-gray-500 mt-1">
+                    📅 Date: {task.date}
+                  </p>
+
                   <p className="text-sm text-gray-500">
-                    📅 {task.date} &nbsp; 🕒 {task.time}
+                    🕒 Time: {task.time}
                   </p>
                 </div>
 
@@ -132,6 +147,7 @@ function App() {
               >
                 Delete
               </button>
+
             </div>
           ))}
         </div>
