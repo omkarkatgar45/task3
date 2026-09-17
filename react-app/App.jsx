@@ -1,39 +1,99 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TaskList from './TaskList'
+
+const API_URL = 'http://127.0.0.1:8000/'
 
 function App() {
   const [task, setTask] = useState('')
   const [tasks, setTasks] = useState([])
 
-  const addTask = () => {
+  // Get tasks from Django
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch(API_URL)
+      const data = await response.json()
+      setTasks(data.tasks || [])
+    } catch (error) {
+      console.error('Error fetching tasks:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchTasks()
+  }, [])
+
+  // Add task
+  const addTask = async () => {
     if (task.trim() === '') return
 
-    const now = new Date()
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          task_name: task,
+          description: 'Task added from React',
+          status: 'Pending',
+        }),
+      })
 
-    setTasks([
-      ...tasks,
-      {
-        text: task,
-        completed: false,
-        date: now.toLocaleDateString(),
-        time: now.toLocaleTimeString(),
-      },
-    ])
-
-    setTask('')
+      if (response.ok) {
+        setTask('')
+        fetchTasks()
+      }
+    } catch (error) {
+      console.error('Error adding task:', error)
+    }
   }
 
-  const completeTask = (index) => {
-    const updatedTasks = [...tasks]
+  // Complete task
+  const completeTask = async (index) => {
+    const selectedTask = tasks[index]
 
-    updatedTasks[index].completed =
-      !updatedTasks[index].completed
+    try {
+      await fetch(API_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: selectedTask.id,
+          task_name: selectedTask.task_name,
+          description: selectedTask.description,
+          status:
+            selectedTask.status === 'Completed'
+              ? 'Pending'
+              : 'Completed',
+        }),
+      })
 
-    setTasks(updatedTasks)
+      fetchTasks()
+    } catch (error) {
+      console.error('Error updating task:', error)
+    }
   }
 
-  const deleteTask = (index) => {
-    setTasks(tasks.filter((_, i) => i !== index))
+  // Delete task
+  const deleteTask = async (index) => {
+    const selectedTask = tasks[index]
+
+    try {
+      await fetch(API_URL, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: selectedTask.id,
+        }),
+      })
+
+      fetchTasks()
+    } catch (error) {
+      console.error('Error deleting task:', error)
+    }
   }
 
   return (
